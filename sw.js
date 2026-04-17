@@ -1,5 +1,45 @@
-self.addEventListener('install', e => e.waitUntil(caches.open('v1').then(cache => cache.addAll(['/', '/index.html', '/app.js']))));
+const CACHE_NAME = "sveglia-duty-v2";
 
-self.addEventListener('fetch', e => {
-    e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll([
+        "./",
+        "./index.html",
+        "./app.js",
+        "./manifest.json"
+      ]);
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      return (
+        cached ||
+        fetch(event.request).catch(() => {
+          if (event.request.mode === "navigate") {
+            return caches.match("./index.html");
+          }
+        })
+      );
+    })
+  );
 });
