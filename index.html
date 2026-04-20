@@ -9,47 +9,66 @@
   <meta name="theme-color" content="#2196F3" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f7fb;
-      color: #1f2937;
-      padding: 18px;
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #2196f3;
+      --primary-dark: #1976d2;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #dbe3ee;
+      --success-bg: #ecfdf3;
+      --success-text: #166534;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 16px;
     }
 
-    .wrap {
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 18px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #eef6ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .app {
       max-width: 560px;
       margin: 0 auto;
     }
 
     .card {
-      background: #fff;
-      border-radius: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       padding: 18px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
       margin-bottom: 16px;
     }
 
     h1 {
-      margin-top: 0;
-      color: #1976D2;
       text-align: center;
+      margin: 0 0 8px;
       font-size: 28px;
+      color: var(--primary-dark);
     }
 
-    p.info {
+    .subtitle {
       text-align: center;
-      color: #6b7280;
+      color: var(--muted);
+      margin: 0 0 18px;
       font-size: 14px;
-      margin-bottom: 18px;
     }
 
     label {
       display: block;
-      margin-bottom: 7px;
-      font-weight: bold;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 15px;
     }
 
     input, button, select {
@@ -57,22 +76,20 @@
       padding: 14px;
       border-radius: 12px;
       font-size: 16px;
-      box-sizing: border-box;
       margin-bottom: 12px;
-    }
-
-    input, select {
-      border: 1px solid #dbe3ee;
+      border: 1px solid var(--border);
       background: #fff;
     }
 
     button {
       border: none;
-      background: #2196F3;
-      color: white;
-      font-weight: bold;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
       cursor: pointer;
     }
+
+    button:hover { background: var(--primary-dark); }
 
     button.secondary {
       background: #eef2ff;
@@ -82,8 +99,8 @@
 
     button.ghost {
       background: #fff;
-      color: #111827;
-      border: 1px solid #dbe3ee;
+      color: var(--text);
+      border: 1px solid var(--border);
     }
 
     .grid-2 {
@@ -94,7 +111,7 @@
 
     .results {
       display: none;
-      background: #ecfdf3;
+      background: var(--success-bg);
       border: 1px solid #bbf7d0;
       border-radius: 14px;
       padding: 14px;
@@ -105,24 +122,19 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       padding: 10px 0;
       border-bottom: 1px dashed #cfe8d5;
-      gap: 12px;
     }
 
-    .row:last-child {
-      border-bottom: none;
-    }
+    .row:last-child { border-bottom: none; }
 
-    .label {
-      font-weight: bold;
-      color: #166534;
-    }
+    .label { font-weight: 700; color: #166534; }
 
     .time {
       font-size: 24px;
       font-weight: 800;
-      color: #166534;
+      color: var(--success-text);
     }
 
     .events {
@@ -132,25 +144,25 @@
     }
 
     .event-item {
-      background: #fff;
-      border: 1px solid #dbe3ee;
+      border: 1px solid var(--border);
       border-radius: 14px;
       padding: 12px;
+      background: #fff;
     }
 
     .event-title {
-      font-weight: bold;
+      font-weight: 700;
       margin-bottom: 4px;
     }
 
     .event-meta {
+      color: var(--muted);
       font-size: 13px;
-      color: #6b7280;
       margin-bottom: 10px;
     }
 
     .status {
-      color: #6b7280;
+      color: var(--muted);
       font-size: 14px;
       margin-top: 6px;
     }
@@ -166,25 +178,17 @@
     }
 
     @media (max-width: 520px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
-
-      .time {
-        font-size: 21px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
+      .grid-2 { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+      .time { font-size: 21px; }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="app">
     <div class="card">
       <h1>Calcolatore Sveglia Duty</h1>
-      <p class="info">Calcola presentazione, uscita di casa e sveglia partendo dall'orario duty.</p>
+      <p class="subtitle">Stessa interfaccia su PC e mobile, senza service worker.</p>
 
       <label for="dutyTime">Orario inizio duty</label>
       <input type="time" id="dutyTime" value="06:00" />
@@ -226,20 +230,20 @@
 
     <div class="card">
       <label>Google Calendar</label>
-      <button id="authorize_button" class="secondary" type="button" style="visibility:hidden;">Collega Google Calendar</button>
-      <button id="signout_button" class="ghost" type="button" style="visibility:hidden;">Disconnetti</button>
+      <button id="authorize_button" class="secondary" type="button" style="display:none;">Collega Google Calendar</button>
+      <button id="signout_button" class="ghost" type="button" style="display:none;">Disconnetti</button>
 
       <div id="calendarStatus" class="status">Google Calendar non collegato.</div>
       <div id="events" class="events"></div>
 
       <div class="warning">
-        Se il bottone Google Calendar non si attiva, controlla di avere inserito Client ID e API Key corretti in app.js e l'origine autorizzata giusta su Google Cloud.
+        Inserisci Client ID e API Key in app.js. Se vuoi solo il calcolo manuale, puoi ignorare questa parte.
       </div>
     </div>
   </div>
 
+  <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
   <script src="./app.js"></script>
-  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
