@@ -19,7 +19,6 @@ const resultsEl = document.getElementById("results");
 const presentazioneOut = document.getElementById("presentazioneOut");
 const uscitaOut = document.getElementById("uscitaOut");
 const svegliaOut = document.getElementById("svegliaOut");
-
 const copyAlarmBtn = document.getElementById("copyAlarmBtn");
 const androidAlarmBtn = document.getElementById("androidAlarmBtn");
 
@@ -28,21 +27,19 @@ const signoutButton = document.getElementById("signout_button");
 const calendarStatus = document.getElementById("calendarStatus");
 const eventsEl = document.getElementById("events");
 
-function pad(num) {
-  return String(num).padStart(2, "0");
+function pad(n) {
+  return String(n).padStart(2, "0");
 }
 
-function timeToMinutes(timeStr) {
-  const parts = timeStr.split(":");
-  return (Number(parts[0]) * 60) + Number(parts[1]);
+function timeToMinutes(str) {
+  const [h, m] = str.split(":").map(Number);
+  return (h * 60) + m;
 }
 
-function minutesToTime(totalMinutes) {
-  let m = totalMinutes % (24 * 60);
-  if (m < 0) m += (24 * 60);
-  const hh = Math.floor(m / 60);
-  const mm = m % 60;
-  return `${pad(hh)}:${pad(mm)}`;
+function minutesToTime(total) {
+  let mins = total % (24 * 60);
+  if (mins < 0) mins += (24 * 60);
+  return `${pad(Math.floor(mins / 60))}:${pad(mins % 60)}`;
 }
 
 function calculateTimes() {
@@ -69,19 +66,9 @@ function calculateTimes() {
   uscitaOut.textContent = leaveHomeText;
   svegliaOut.textContent = alarmText;
   resultsEl.style.display = "block";
-
   currentAlarmTime = alarmText;
   copyAlarmBtn.style.display = "block";
   androidAlarmBtn.style.display = "block";
-
-  try {
-    localStorage.setItem("svegliaDutySettings", JSON.stringify({
-      dutyTime,
-      prepBeforeDuty,
-      travelMinutes,
-      alarmAdvance
-    }));
-  } catch (e) {}
 }
 
 function copyAlarmTime() {
@@ -101,19 +88,7 @@ function openAndroidAlarm() {
     return;
   }
 
-  alert(`Imposta la sveglia alle ${currentAlarmTime}. Da browser l'apertura diretta dell'app Orologio dipende dal telefono/browser Android.`);
-}
-
-function loadSavedSettings() {
-  try {
-    const raw = localStorage.getItem("svegliaDutySettings");
-    if (!raw) return;
-    const saved = JSON.parse(raw);
-    if (saved.dutyTime) dutyTimeEl.value = saved.dutyTime;
-    if (saved.prepBeforeDuty !== undefined) prepBeforeDutyEl.value = saved.prepBeforeDuty;
-    if (saved.travelMinutes !== undefined) travelMinutesEl.value = saved.travelMinutes;
-    if (saved.alarmAdvance !== undefined) alarmAdvanceEl.value = saved.alarmAdvance;
-  } catch (e) {}
+  alert(`Imposta la sveglia alle ${currentAlarmTime}.`);
 }
 
 function escapeHtml(str) {
@@ -126,19 +101,16 @@ function escapeHtml(str) {
 }
 
 function eventStartToTime(event) {
-  if (!event || !event.start) return null;
-
+  if (!event?.start) return null;
   if (event.start.dateTime) {
     const dt = new Date(event.start.dateTime);
     return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
   }
-
   return null;
 }
 
 function formatEventDate(event) {
-  if (!event || !event.start) return "Data non disponibile";
-
+  if (!event?.start) return "Data non disponibile";
   if (event.start.dateTime) {
     const dt = new Date(event.start.dateTime);
     return dt.toLocaleString("it-IT", {
@@ -149,11 +121,9 @@ function formatEventDate(event) {
       minute: "2-digit"
     });
   }
-
   if (event.start.date) {
     return new Date(event.start.date).toLocaleDateString("it-IT");
   }
-
   return "Data non disponibile";
 }
 
@@ -176,13 +146,9 @@ function renderEvents() {
 
   document.querySelectorAll(".use-event-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
-      const index = Number(this.dataset.index);
-      const event = calendarEvents[index];
+      const event = calendarEvents[Number(this.dataset.index)];
       const time = eventStartToTime(event);
-      if (!time) {
-        alert("Evento senza orario utilizzabile.");
-        return;
-      }
+      if (!time) return;
       dutyTimeEl.value = time;
       calculateTimes();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -190,54 +156,56 @@ function renderEvents() {
   });
 }
 
+function loadSavedSettings() {
+  try {
+    const raw = localStorage.getItem("svegliaDutySettings");
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.dutyTime) dutyTimeEl.value = saved.dutyTime;
+    if (saved.prepBeforeDuty !== undefined) prepBeforeDutyEl.value = saved.prepBeforeDuty;
+    if (saved.travelMinutes !== undefined) travelMinutesEl.value = saved.travelMinutes;
+    if (saved.alarmAdvance !== undefined) alarmAdvanceEl.value = saved.alarmAdvance;
+  } catch (e) {}
+}
+
 function gapiLoaded() {
   gapi.load("client", initializeGapiClient);
 }
 
 async function initializeGapiClient() {
-  try {
-    if (!API_KEY || API_KEY.includes("INSERISCI_QUI")) {
-      calendarStatus.textContent = "Inserisci API Key e Client ID in app.js.";
-      return;
-    }
-
-    await gapi.client.init({
-      apiKey: API_KEY,
-      discoveryDocs: [DISCOVERY_DOC]
-    });
-
-    gapiInited = true;
-    maybeEnableButtons();
-  } catch (err) {
-    calendarStatus.textContent = "Errore inizializzazione Google API.";
-    console.error(err);
+  if (!API_KEY || API_KEY.includes("INSERISCI_QUI")) {
+    calendarStatus.textContent = "Inserisci API Key e Client ID in app.js.";
+    return;
   }
+
+  await gapi.client.init({
+    apiKey: API_KEY,
+    discoveryDocs: [DISCOVERY_DOC]
+  });
+
+  gapiInited = true;
+  maybeEnableButtons();
 }
 
 function gisLoaded() {
-  try {
-    if (!CLIENT_ID || CLIENT_ID.includes("INSERISCI_QUI")) {
-      calendarStatus.textContent = "Inserisci API Key e Client ID in app.js.";
-      return;
-    }
-
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: ""
-    });
-
-    gisInited = true;
-    maybeEnableButtons();
-  } catch (err) {
-    calendarStatus.textContent = "Errore inizializzazione Google Sign-In.";
-    console.error(err);
+  if (!CLIENT_ID || CLIENT_ID.includes("INSERISCI_QUI")) {
+    calendarStatus.textContent = "Inserisci API Key e Client ID in app.js.";
+    return;
   }
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: ""
+  });
+
+  gisInited = true;
+  maybeEnableButtons();
 }
 
 function maybeEnableButtons() {
   if (gapiInited && gisInited) {
-    authorizeButton.style.visibility = "visible";
+    authorizeButton.style.display = "block";
     calendarStatus.textContent = "Pronto per collegare Google Calendar.";
   }
 }
@@ -250,13 +218,12 @@ async function handleAuthClick() {
 
   tokenClient.callback = async (resp) => {
     if (resp.error !== undefined) {
-      console.error(resp);
-      alert("Errore durante autorizzazione Google.");
+      alert("Errore durante l'autorizzazione Google.");
       return;
     }
 
-    signoutButton.style.visibility = "visible";
-    authorizeButton.innerText = "Aggiorna eventi";
+    signoutButton.style.display = "block";
+    authorizeButton.textContent = "Aggiorna eventi";
     await listUpcomingEvents();
   };
 
@@ -276,8 +243,8 @@ function handleSignoutClick() {
 
   calendarEvents = [];
   eventsEl.innerHTML = "";
-  authorizeButton.innerText = "Collega Google Calendar";
-  signoutButton.style.visibility = "hidden";
+  signoutButton.style.display = "none";
+  authorizeButton.textContent = "Collega Google Calendar";
   calendarStatus.textContent = "Google Calendar disconnesso.";
 }
 
@@ -313,11 +280,3 @@ window.gapiLoaded = gapiLoaded;
 window.gisLoaded = gisLoaded;
 
 loadSavedSettings();
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch((err) => {
-      console.error("Errore Service Worker:", err);
-    });
-  });
-}
