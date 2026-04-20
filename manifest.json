@@ -14,12 +14,6 @@
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
-    },
-    {
-      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSI5NiIgZmlsbD0iIzIxOTZGMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTIlIiBmb250LXNpemU9IjI1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+4o23PC90ZXh0Pjwvc3ZnPg==",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
     }
   ]
 }
